@@ -1,0 +1,5 @@
+{
+	"syphonIn" : "td01",
+	"syphonOut" : "of01",
+	"oscPort" : 9001
+}
