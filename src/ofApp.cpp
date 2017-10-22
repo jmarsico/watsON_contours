@@ -26,7 +26,7 @@ void ofApp::setup(){
     gui.add(holes.set("Holes", false));
     gui.add(smoothingSize.set("smoothing size", 1, 0, 40));
     gui.add(maxNumLines.set("max numlines", 10, 10, 10000));
-    gui.add(iterations.set("contour iterations", 10, 1, 100));
+    gui.add(iterations.set("contour iterations", 10, 1, 60));
     gui.add(lerpAmt.set("lerp amt", 0.0, 0.0, 1.0));
     gui.add(maxNumPoints.set("numPoints", 1000, 100, 10000));
     gui.add(framesBetweenCapture.set("frames between", 10, 1, 300));
@@ -37,20 +37,33 @@ void ofApp::setup(){
     //set our OSC listener
     oscIn.setup(config["oscPort"].asInt());
     
+    //setup what camera we are
+    camNumber = config["camNumber"].asInt();
+    
+    ofSetWindowTitle(ofToString(camNumber));
+    
     
     //lets start with two groups
-    LineGroup A;
-    groups.push_back(A);
-    LineGroup B;
-    groups.push_back(B);
+    LineGroup contours;
+    groups.push_back(contours);
+    LineGroup lines;
+    groups.push_back(lines);
+    LineGroup merged;
+    groups.push_back(merged);
 
-            
+    
+    pMerge.setup();
+    
     
 
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
+    
+    //get the incoming OSC messages
+    getOsc();
+    
     //get the syphon input image
     inputFbo.begin();
     syphonIn.draw(0,0);
@@ -81,6 +94,37 @@ void ofApp::update(){
             groups[0].lines.push_back(p);
         }
     }
+    
+    int numLines = groups[0].lines.size();
+    
+    if(numLines > 0){
+        float spacing = inputPix.getWidth()/numLines;
+        
+        //we want to have the same number of straight lights as contours
+        for(int i = 0; i < numLines; i++){
+            ofPolyline pl;
+            pl.addVertex(ofPoint(i*spacing, 0));
+            pl.addVertex(ofPoint(i*spacing, inputPix.getHeight()));
+            pl.resize(groups[0].lines[i].size());
+            groups[1].lines.push_back(pl);
+        }
+        
+        
+        
+    }
+            //merge between the two lines
+        for(int i = 0; i < numLines; i++){
+            pMerge.setPoly1(groups[0].lines[i]);
+            pMerge.setPoly2(groups[1].lines[i]);
+            
+            pMerge.mergePolyline(lerpAmt);
+            ofPolyline pl = pMerge.getPolyline();
+            groups[2].lines.push_back(pl);
+        }
+
+    
+    
+    
 
     //resize the contours to original resolution (4x the size we have);
     for(auto& g : groups){
@@ -117,24 +161,66 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
     
-    inputFbo.draw(0,0);
-    
+    //draw the lines into an FBO
     outputFbo.begin();
-    ofClear(0,0,0,0);
-    for(auto &pl : groups[0].lines){
-        pl.draw();
-    }
+        ofClear(0,0,0,0);
+        for(auto &pl : groups[2].lines){
+            pl.draw();
+        }
     outputFbo.end();
     
+    //draw the input image
+    inputFbo.draw(0,0);
     
-    outputFbo.draw(0,0,inputFbo.getWidth(), inputFbo.getHeight());
-    
+    //send the lines texture to TD
     syphonOut.publishTexture(&outputFbo.getTexture());
     
+    //draw the FBO so we can see it
+    outputFbo.draw(0,0,inputFbo.getWidth(), inputFbo.getHeight());
     
+    //draw the gui and our data
     gui.draw();
-    ofDrawBitmapStringHighlight(ss.str(), 10 + gui.getWidth() + 10, gui.getPosition().y + 15);
+    ofDrawBitmapStringHighlight(ss.str(), 10 , 200);
 }
+
+//--------------------------------------------------------------
+void ofApp::getOsc(){
+    
+    while(oscIn.hasWaitingMessages()){
+        ofxOscMessage m;
+        oscIn.getNextMessage(m);
+        
+        string address = "/contours/";
+        address += ofToString(camNumber);
+        
+        string smoothAddress = address;
+        smoothAddress += "/smooth";
+        
+        string iterAddress = address;
+        iterAddress += "/iter";
+        
+        string lerpAddress = address;
+        lerpAddress += "/lerp";
+        
+        
+        if(m.getAddress() == smoothAddress){
+            smoothingSize = (int)ofMap(m.getArgAsFloat(0), 0, 1.0, 1, 60);
+        }
+        else if(m.getAddress() == iterAddress){
+            iterations = (int)ofMap(m.getArgAsFloat(0), 0.0, 1.0, 1, 60);
+        }
+        else if(m.getAddress() == lerpAddress){
+            lerpAmt = m.getArgAsFloat(0);
+        }
+    }
+    
+    
+}
+
+
+
+
+
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
