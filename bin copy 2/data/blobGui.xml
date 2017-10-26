@@ -1,0 +1,8 @@
+<group>
+	<min_area>10.405</min_area>
+	<max_area>35.965</max_area>
+	<thresh>132</thresh>
+	<persistence>73</persistence>
+	<max_dist>107</max_dist>
+<group/>
+</group>

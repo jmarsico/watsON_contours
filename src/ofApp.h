@@ -17,6 +17,7 @@ public:
     void update();
     void draw();
     void getOsc();
+    ofPixels updateAverage();
 
     void keyPressed(int key);
     void keyReleased(int key);
@@ -32,6 +33,7 @@ public:
     
     
     ofxPanel gui;
+    ofParameter<bool> bUseipad;
     ofParameter<bool> holes;
     ofParameter<float> minArea;
     ofParameter<float> maxArea;
@@ -42,10 +44,21 @@ public:
     ofParameter<float> lerpAmt;
     ofParameter<int> maxNumPoints;
     ofParameter<int> framesBetweenCapture;
-
+    ofParameter<int> pixBufferSize;
     
+    ofxPanel blobGui;
+    ofParameter<float> blobminArea;
+    ofParameter<float> blobmaxArea;
+    ofParameter<int> blobthreshold;
+    ofParameter<int> persistence;
+    ofParameter<int> maxDist;
+    
+    
+
+    bool bShowOutput;
     
     ofxCv::ContourFinder contourFinder;
+    ofxCv::ContourFinder blobTracker;
     
     
     //we want several sets of polylines
@@ -69,9 +82,11 @@ public:
     
 	//for gaining
     ofxOscReceiver oscIn;
+    ofxOscSender oscOut;
     
     //we want to average several incoming images
-    vector<ofPixels> pixBuffer;
+    deque<ofPixels> pixBuffer;
+    vector<int> totalPixVal;
     
     //out polyline merger
     ofxPolylineMerger pMerge;
