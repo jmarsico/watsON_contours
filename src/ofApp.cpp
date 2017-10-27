@@ -85,6 +85,8 @@ void ofApp::setup(){
     bShowOutput = false;
     
 
+    
+
 }
 
 //--------------------------------------------------------------
@@ -155,13 +157,7 @@ void ofApp::update(){
     
         //merge between the two lines
         for(int i = 0; i < numLines; i++){
-            
-            
-//            pMerge.setPoly1(groups[0].lines[i]);
-//            pMerge.setPoly2(groups[1].lines[i]);
-//            
-//            pMerge.mergePolyline(lerpAmt);
-//            ofPolyline pl = pMerge.getPolyline();
+
             pMerge.setNbPoints(groups[0].lines[i].size());
             pMerge.mergePolyline(groups[0].lines[i], groups[1].lines[i], lerpAmt);
             ofPolyline pl = pMerge.getPolyline();
@@ -188,36 +184,36 @@ void ofApp::update(){
     //now we do the blob tracking
 //    blur(inputPix, 10);
     //we want to only see blue
-    for(int i = 0; i < inputPix.size(); i++){
-        
-        int b = inputPix.getColor(i).b;
-        inputPix.setColor(i, ofColor(b,b,b,255));
-        
-    }
+//    for(int i = 0; i < inputPix.size(); i++){
+//        
+//        int b = inputPix.getColor(i).b;
+//        inputPix.setColor(i, ofColor(b,b,b,255));
+//        
+//    }
     
     
-    blobTracker.findContours(inputPix);
-    
-    //send blob centroids to TD
-    for(int i = 0; i < blobTracker.size(); i++){
-        ofxOscMessage m;
-        ofVec2f p = toOf(blobTracker.getCenter(i));
-        float x = p.x/(float)inputPix.getWidth();
-        float y = p.y/(float)inputPix.getHeight();
-        
-        //address
-        string address = "/blobs/";
-        address += ofToString(camNumber);
-        address += "/";
-        address += ofToString(i);
-        
-        m.setAddress(address);
-        m.addFloatArg(x);
-        m.addFloatArg(y);
-        
-        oscOut.sendMessage(m);
-        
-    }
+//    blobTracker.findContours(inputPix);
+//    
+//    //send blob centroids to TD
+//    for(int i = 0; i < blobTracker.size(); i++){
+//        ofxOscMessage m;
+//        ofVec2f p = toOf(blobTracker.getCenter(i));
+//        float x = p.x/(float)inputPix.getWidth();
+//        float y = p.y/(float)inputPix.getHeight();
+//        
+//        //address
+//        string address = "/blobs/";
+//        address += ofToString(camNumber);
+//        address += "/";
+//        address += ofToString(i);
+//        
+//        m.setAddress(address);
+//        m.addFloatArg(x);
+//        m.addFloatArg(y);
+//        
+//        oscOut.sendMessage(m);
+//        
+//    }
     
     
     
