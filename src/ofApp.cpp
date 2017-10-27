@@ -84,7 +84,7 @@ void ofApp::setup(){
     
     bShowOutput = false;
     
-
+    testimg.load("test.jpg");
     
 
 }
@@ -96,22 +96,25 @@ void ofApp::update(){
     getOsc();
     
     
-    //get the syphon input image
-    inputFbo.begin();
-    syphonIn.draw(0,0);
-    inputFbo.end();
+//    //get the syphon input image
+//    inputFbo.begin();
+//    syphonIn.draw(0,0);
+//    inputFbo.end();
+//    
+//    reader.readToPixels(inputFbo, inputPix);
     
-    reader.readToPixels(inputFbo, inputPix);
+    testimg.resize(320, 180);
+    inputPix = testimg.getPixelsRef();
     
-    //update teh settings for the blob tracker
-    blobTracker.setMinAreaRadius(blobminArea);
-    blobTracker.setMaxAreaRadius(blobmaxArea);
-    blobTracker.setThreshold(blobthreshold);
-    // wait for half a frame before forgetting something
-    blobTracker.getTracker().setPersistence(persistence);
-    // an object can move up to 32 pixels per frame
-    blobTracker.getTracker().setMaximumDistance(maxDist);
-    blobTracker.setFindHoles(true);
+//    //update teh settings for the blob tracker
+//    blobTracker.setMinAreaRadius(blobminArea);
+//    blobTracker.setMaxAreaRadius(blobmaxArea);
+//    blobTracker.setThreshold(blobthreshold);
+//    // wait for half a frame before forgetting something
+//    blobTracker.getTracker().setPersistence(persistence);
+//    // an object can move up to 32 pixels per frame
+//    blobTracker.getTracker().setMaximumDistance(maxDist);
+//    blobTracker.setFindHoles(true);
     
 //    blobTracker.s
     

@@ -100,7 +100,7 @@ public:
     int camNumber;
     
     
-    
+    ofImage testimg;
     
     
     
