@@ -5,7 +5,7 @@ using namespace cv;
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-    
+    ofSetWindowShape(1280, 800);
     //load the config file
     config.open("config.json");
     
@@ -40,6 +40,7 @@ void ofApp::setup(){
     gui.add(holes.set("Holes", false));
     gui.add(smoothingSize.set("smoothing size", 1, 0, 40));
     gui.add(maxNumLines.set("max numlines", 10, 10, 10000));
+    gui.add(drawNumLines.set("Num Line Draw", 10, 0, 200));
     gui.add(iterations.set("contour iterations", 10, 1, 60));
     gui.add(lerpAmt.set("lerp amt", 0.0, 0.0, 1.0));
     gui.add(maxNumPoints.set("numPoints", 1000, 100, 10000));
@@ -78,13 +79,15 @@ void ofApp::setup(){
     groups.push_back(lines);
     LineGroup merged;
     groups.push_back(merged);
-
-    
 //    pMerge.setup();
     
     bShowOutput = false;
     
+    // This was for trying to initialize the static lines once in the update function (when it was first run)
+    bStaticLinesInit = false;
+    
     testimg.load("test.jpg");
+    
     
 
 }
@@ -106,6 +109,8 @@ void ofApp::update(){
     testimg.resize(320, 180);
     inputPix = testimg.getPixelsRef();
     
+   
+    
 //    //update teh settings for the blob tracker
 //    blobTracker.setMinAreaRadius(blobminArea);
 //    blobTracker.setMaxAreaRadius(blobmaxArea);
@@ -119,9 +124,10 @@ void ofApp::update(){
 //    blobTracker.s
     
     
-    
-    for(auto& g : groups){
+    for(int i = 0; i < 3; i++){
+        auto& g = groups[i];
         g.lines.clear();
+        
     }
     
     
@@ -141,23 +147,27 @@ void ofApp::update(){
         }
     }
     
+    // Static line setup
+   
+    
     int numLines = groups[0].lines.size();
     
     if(numLines > 0){
-        float spacing = inputPix.getWidth()/numLines;
-        
-        //we want to have the same number of straight lights as contours
+        float spacing = 5;
+        float init_x = inputPix.getWidth()/2;
         for(int i = 0; i < numLines; i++){
             ofPolyline pl;
-            pl.addVertex(ofPoint(i*spacing, 0));
-            pl.addVertex(ofPoint(i*spacing, inputPix.getHeight()));
-//            pl.resize(groups[0].lines[i].size());
+            if((i)%2 == 0) {
+                pl.addVertex(ofPoint(init_x + ((i+1)/2)*spacing, 0));
+                pl.addVertex(ofPoint(init_x + ((i+1)/2)*spacing, inputPix.getHeight()));
+            } else {
+                pl.addVertex(ofPoint(init_x + (-1)*((i+1)/2)*spacing, 0));
+                pl.addVertex(ofPoint(init_x + (-1)*((i+1)/2)*spacing, inputPix.getHeight()));
+            }
+            //            pl.resize(groups[0].lines[i].size());
             groups[1].lines.push_back(pl);
         }
         
-        
-        
-    
         //merge between the two lines
         for(int i = 0; i < numLines; i++){
 
@@ -167,11 +177,6 @@ void ofApp::update(){
             groups[2].lines.push_back(pl);
         }
     }
-//
-    
-    
-    
-
     //resize the contours to original resolution (4x the size we have);
     for(int i = 0; i < groups.size(); i++){
         for(auto& l : groups[i].lines){
@@ -250,7 +255,14 @@ void ofApp::draw(){
     outputFbo.begin();
         ofClear(0,0,0,0);
         ofSetColor(255,255);
-        for(auto &pl : groups[2].lines){
+        ofSetLineWidth(3);
+//        for(auto &pl : groups[2].lines){
+//            pl.draw();
+//        }
+        int numLines = groups[2].lines.size();
+        int minNumLines = numLines > (int) drawNumLines ? (int) drawNumLines : numLines;
+        for(int i = 0; i < minNumLines; i++) {
+            auto &pl = groups[2].lines[i];
             pl.draw();
         }
     outputFbo.end();
@@ -269,7 +281,8 @@ void ofApp::draw(){
         img.draw(0,0);
         
         //draw the FBO so we can see it
-        outputFbo.draw(0,0,inputFbo.getWidth(), inputFbo.getHeight());
+//        outputFbo.draw(0,0,inputFbo.getWidth(), inputFbo.getHeight());
+        outputFbo.draw(0,0, 1280, 720);
     }
     
     

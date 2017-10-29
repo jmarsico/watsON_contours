@@ -45,6 +45,7 @@ public:
     ofParameter<int> maxNumPoints;
     ofParameter<int> framesBetweenCapture;
     ofParameter<int> pixBufferSize;
+    ofParameter<int> drawNumLines;
     
     ofxPanel blobGui;
     ofParameter<float> blobminArea;
@@ -56,7 +57,7 @@ public:
     
 
     bool bShowOutput;
-    
+    bool bStaticLinesInit;
     ofxCv::ContourFinder contourFinder;
     ofxCv::ContourFinder blobTracker;
     
