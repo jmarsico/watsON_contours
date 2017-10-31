@@ -82,7 +82,7 @@ void ofApp::setup(){
     
 //    pMerge.setup();
     
-    bShowOutput = false;
+    bShowOutput = true;
     
     testimg.load("test.jpg");
     
@@ -96,15 +96,15 @@ void ofApp::update(){
     getOsc();
     
     
-//    //get the syphon input image
-//    inputFbo.begin();
-//    syphonIn.draw(0,0);
-//    inputFbo.end();
-//    
-//    reader.readToPixels(inputFbo, inputPix);
+    //get the syphon input image
+    inputFbo.begin();
+    syphonIn.draw(0,0);
+    inputFbo.end();
+    
+    reader.readToPixels(inputFbo, inputPix);
     
     testimg.resize(320, 180);
-    inputPix = testimg.getPixelsRef();
+//    inputPix = testimg.getPixelsRef();
     
 //    //update teh settings for the blob tracker
 //    blobTracker.setMinAreaRadius(blobminArea);
@@ -337,9 +337,14 @@ void ofApp::getOsc(){
             iterations = (int)ofMap(m.getArgAsFloat(0), 0.0, 1.0, 1, 60);
         }
         
+        if(m.getAddress() == "/contours/bUseIpad"){
+            bUseipad = m.getArgAsInt(0);
+        }
+        
         if(bUseipad){
             if(m.getAddress() == lerpAddress){
                 lerpAmt = m.getArgAsFloat(0);
+                
             }
         }
         
@@ -374,7 +379,7 @@ void ofApp::keyPressed(int key){
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
     if(key == 's'){
-        bShowOutput = !bShowOutput;
+//        bShowOutput = !bShowOutput;
     }
 }
 
