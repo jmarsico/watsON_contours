@@ -5,7 +5,7 @@ using namespace cv;
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-    ofSetWindowShape(1280, 800);
+//    ofSetWindowShape(1280, 800);
     //load the config file
     config.open("config.json");
     
@@ -281,8 +281,8 @@ void ofApp::draw(){
         img.draw(0,0);
         
         //draw the FBO so we can see it
-//        outputFbo.draw(0,0,inputFbo.getWidth(), inputFbo.getHeight());
-        outputFbo.draw(0,0, 1280, 720);
+        outputFbo.draw(0,0,inputFbo.getWidth(), inputFbo.getHeight());
+//        outputFbo.draw(0,0, 1280, 720);
     }
     
     
